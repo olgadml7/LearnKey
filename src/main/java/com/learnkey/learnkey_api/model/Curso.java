@@ -1,4 +1,4 @@
-package com.learnkey.learnkey_api.model;
+package com.learnkey.learnkey_api.model; //cada clase model representa un objeto del mundo real, en este caso las tablas
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -7,17 +7,20 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-@Entity
-@Table(name = "cursos")
-public class Curso {
+@Entity // convierte la clase en una tabla de la base de datos, marca esta clase como
+        // entidad que se guardará en la BD.
+@Table(name = "cursos") // define el nombre real de la tabla en la base de datos.
+public class Curso { // declara la clase Curso. Todo lo que venga dentro define los atributos y
+                     // comportamientos de un curso.
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_curso") // nombre real en la tabla
+    @Id // indica qué campo es la clave primaria.
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // indica que la base de datos asigna automáticamente un valor
+                                                        // único a la clave primaria.
+    @Column(name = "id_curso") // indica a qué columna de la tabla corresponde cada atributo.
     private Integer id;
 
-    @Column(name = "nombre")
-    private String nombre;
+    @Column(name = "nombre") // indica el nombre exacto de la columna en la tabla.
+    private String nombre; // tipo de dato y privada (solo accesible mediante métodos getter y setter).
 
     @Column(name = "descripcion")
     private String descripcion;
@@ -43,11 +46,14 @@ public class Curso {
     @Column(name = "horas_totales")
     private Integer horasTotales;
 
-    // Constructor vacío
+    // Constructor vacío Java necesita un constructor vacío Spring y JPA lo
+    // requieren para poder mapear automáticamente los datos de la base de datos a
+    // objetos Java.
     public Curso() {
     }
 
-    // Getters y Setters
+    // Getters y Setters. Cada atributo tiene un getter (obtiene el valor) y un
+    // setter (asigna un valor).
     public Integer getId() {
         return id;
     }
@@ -131,21 +137,22 @@ public class Curso {
     // Método para calcular horas totales automáticamente
     public void calcularHorasTotales() {
         try {
-            if (horaInicio != null && horaFin != null && diasDeClase != null) {
+            if (horaInicio != null && horaFin != null && diasDeClase != null) { // verifica que no sean nulos
                 String[] hi = horaInicio.split(":");
                 String[] hf = horaFin.split(":");
-                int inicio = Integer.parseInt(hi[0]) * 60 + Integer.parseInt(hi[1]);
+                int inicio = Integer.parseInt(hi[0]) * 60 + Integer.parseInt(hi[1]); // divide la hora en horas y
+                                                                                     // minutos
                 int fin = Integer.parseInt(hf[0]) * 60 + Integer.parseInt(hf[1]);
                 int duracion = fin - inicio; // en minutos
-                if (duracion < 0)
+                if (duracion < 0) // si la duracion es negativa la pone a 0
                     duracion = 0;
-                int dias = diasDeClase.split(",").length;
+                int dias = diasDeClase.split(",").length; // cuenta los dias de clase
                 this.horasTotales = (duracion * dias) / 60; // horas totales
             } else {
                 this.horasTotales = 0;
             }
         } catch (NumberFormatException e) {
             this.horasTotales = 0;
-        }
+        } // si hay algun error de formato se asigna 0
     }
 }
