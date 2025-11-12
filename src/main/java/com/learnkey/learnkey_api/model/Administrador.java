@@ -1,23 +1,39 @@
+// Administrador.java (Model)
 package com.learnkey.learnkey_api.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+/**
+ * Clase que representa la entidad Administrador en la base de datos.
+ * Cada instancia de Administrador corresponde a un registro en la tabla
+ * "administradores".
+ */
 @Entity
 @Table(name = "administradores")
 public class Administrador {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id_administrador;
+    private Integer id_administrador; // Clave primaria
 
+    @Column(nullable = false, length = 100)
     private String nombre;
+
+    @Column(nullable = false, length = 100)
     private String apellidos;
+
+    @Column(length = 30)
     private String telefono;
+
+    @Column(length = 30)
     private String email;
+
+    @Column(length = 30)
     private String rol;
 
     public Administrador() {
@@ -31,12 +47,12 @@ public class Administrador {
         this.rol = rol;
     }
 
-    // Getters y setters
-    public Long getId_administrador() {
+    // Getters y Setters
+    public Integer getId_administrador() {
         return id_administrador;
     }
 
-    public void setId_administrador(Long id_administrador) {
+    public void setId_administrador(Integer id_administrador) {
         this.id_administrador = id_administrador;
     }
 

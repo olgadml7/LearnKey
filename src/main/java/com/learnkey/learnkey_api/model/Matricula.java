@@ -1,21 +1,33 @@
+// Matricula.java (Model)
 package com.learnkey.learnkey_api.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+/**
+ * Clase que representa la entidad Matricula en la base de datos.
+ * Cada instancia corresponde a la inscripción de un alumno en un curso.
+ */
 @Entity
 @Table(name = "matriculas")
 public class Matricula {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id_matricula;
-    private Integer id_alumno;
-    private Integer id_curso;
-    private String fecha_alta;
+    private Integer id_matricula; // Clave primaria
+
+    @Column(name = "id_alumno", nullable = false)
+    private Integer id_alumno; // FK hacia Alumnos
+
+    @Column(name = "id_curso", nullable = false)
+    private Integer id_curso; // FK hacia Cursos
+
+    @Column(name = "fecha_alta")
+    private String fecha_alta; // Fecha de inscripción
 
     public Matricula() {
     }
@@ -28,11 +40,11 @@ public class Matricula {
 
     // Getters y Setters
     public Integer getId_matricula() {
-        return this.id_matricula;
+        return id_matricula;
     }
 
     public Integer getAlumnoId() {
-        return this.id_alumno;
+        return id_alumno;
     }
 
     public void setAlumnoId(Integer id_alumno) {
@@ -40,7 +52,7 @@ public class Matricula {
     }
 
     public Integer getCursoId() {
-        return this.id_curso;
+        return id_curso;
     }
 
     public void setCursoId(Integer id_curso) {
@@ -48,7 +60,7 @@ public class Matricula {
     }
 
     public String getFecha_alta() {
-        return this.fecha_alta;
+        return fecha_alta;
     }
 
     public void setFecha_alta(String fecha_alta) {

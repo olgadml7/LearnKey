@@ -13,12 +13,17 @@ public class Curso {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id_curso;
+    @Column(name = "id_curso") // nombre real en la tabla
+    private Integer id;
+
+    @Column(name = "nombre")
     private String nombre;
+
+    @Column(name = "descripcion")
     private String descripcion;
 
     @Column(name = "id_administrador")
-    private Long idAdministrador;
+    private Integer idAdministrador;
 
     @Column(name = "hora_inicio")
     private String horaInicio;
@@ -36,32 +41,19 @@ public class Curso {
     private String diasDeClase;
 
     @Column(name = "horas_totales")
-    private int horasTotales;
+    private Integer horasTotales;
 
+    // Constructor vacío
     public Curso() {
     }
 
-    public Curso(String nombre, String descripcion, Long idAdministrador,
-            String horaInicio, String horaFin, String fechaInicio,
-            String fechaFin, String diasDeClase) {
-        this.nombre = nombre;
-        this.descripcion = descripcion;
-        this.idAdministrador = idAdministrador;
-        this.horaInicio = horaInicio;
-        this.horaFin = horaFin;
-        this.fechaInicio = fechaInicio;
-        this.fechaFin = fechaFin;
-        this.diasDeClase = diasDeClase;
-        // No llamamos calcularHorasTotales aquí para evitar warning
+    // Getters y Setters
+    public Integer getId() {
+        return id;
     }
 
-    // Getters y setters
-    public Long getId_curso() {
-        return id_curso;
-    }
-
-    public void setId_curso(Long id_curso) {
-        this.id_curso = id_curso;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getNombre() {
@@ -80,11 +72,11 @@ public class Curso {
         this.descripcion = descripcion;
     }
 
-    public Long getIdAdministrador() {
+    public Integer getIdAdministrador() {
         return idAdministrador;
     }
 
-    public void setIdAdministrador(Long idAdministrador) {
+    public void setIdAdministrador(Integer idAdministrador) {
         this.idAdministrador = idAdministrador;
     }
 
@@ -128,36 +120,32 @@ public class Curso {
         this.diasDeClase = diasDeClase;
     }
 
-    public int getHorasTotales() {
+    public Integer getHorasTotales() {
         return horasTotales;
     }
 
-    public void setHorasTotales(int horasTotales) {
+    public void setHorasTotales(Integer horasTotales) {
         this.horasTotales = horasTotales;
     }
 
-    // Método para calcular horas totales
+    // Método para calcular horas totales automáticamente
     public void calcularHorasTotales() {
         try {
-            String[] horaIni = this.horaInicio.split(":");
-            String[] horaFinArr = this.horaFin.split(":");
-
-            int inicioHoras = Integer.parseInt(horaIni[0]);
-            int inicioMinutos = Integer.parseInt(horaIni[1]);
-
-            int finHoras = Integer.parseInt(horaFinArr[0]);
-            int finMinutos = Integer.parseInt(horaFinArr[1]);
-
-            int horas = finHoras - inicioHoras;
-            int minutos = finMinutos - inicioMinutos;
-
-            if (minutos > 0) {
-                horas += minutos / 60; // redondeamos a horas completas
+            if (horaInicio != null && horaFin != null && diasDeClase != null) {
+                String[] hi = horaInicio.split(":");
+                String[] hf = horaFin.split(":");
+                int inicio = Integer.parseInt(hi[0]) * 60 + Integer.parseInt(hi[1]);
+                int fin = Integer.parseInt(hf[0]) * 60 + Integer.parseInt(hf[1]);
+                int duracion = fin - inicio; // en minutos
+                if (duracion < 0)
+                    duracion = 0;
+                int dias = diasDeClase.split(",").length;
+                this.horasTotales = (duracion * dias) / 60; // horas totales
+            } else {
+                this.horasTotales = 0;
             }
-
-            this.horasTotales = horas;
-        } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-            this.horasTotales = 0; // capturamos solo las excepciones necesarias
+        } catch (NumberFormatException e) {
+            this.horasTotales = 0;
         }
     }
 }

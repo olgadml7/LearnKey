@@ -1,33 +1,50 @@
+// Alumno.java (Model)
 package com.learnkey.learnkey_api.model;
 
 import java.time.LocalDate;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+/**
+ * Clase que representa la entidad Alumno en la base de datos.
+ * Cada instancia de Alumno corresponde a un registro en la tabla "alumnos".
+ */
 @Entity
 @Table(name = "alumnos")
 public class Alumno {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id_alumno;
+    private Integer id_alumno; // Clave primaria
+
+    @Column(nullable = false, length = 100)
     private String nombre;
+
+    @Column(nullable = false, length = 100)
     private String apellidos;
+
+    @Column(nullable = false, length = 20, unique = true)
     private String dni;
+
+    @Column(name = "fecha_nacimiento")
     private LocalDate fecha_nacimiento;
+
+    @Column(length = 100)
     private String email;
+
+    @Column(length = 30)
     private String telefono;
 
     public Alumno() {
     }
 
     public Alumno(Integer id_alumno, String nombre, String apellidos, String dni, LocalDate fecha_nacimiento,
-            String email,
-            String telefono) {
+            String email, String telefono) {
         this.id_alumno = id_alumno;
         this.nombre = nombre;
         this.apellidos = apellidos;

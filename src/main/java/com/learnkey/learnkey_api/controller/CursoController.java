@@ -1,17 +1,11 @@
 package com.learnkey.learnkey_api.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import com.learnkey.learnkey_api.model.Curso;
 import com.learnkey.learnkey_api.repository.CursoRepository;
@@ -28,53 +22,66 @@ public class CursoController {
     @GetMapping
     public List<Curso> getAllCursos() {
         List<Curso> cursos = cursoRepository.findAll();
-        cursos.forEach(Curso::calcularHorasTotales); // recalcular para los existentes
+        cursos.forEach(c -> {
+            if (c.getHorasTotales() == null) {
+                c.calcularHorasTotales();
+            }
+        });
         return cursos;
     }
 
-    // // Obtener curso por id
-    // @GetMapping("/{id}")
-    // public Curso getCursoById(@PathVariable Long id) {
-    // Curso curso = cursoRepository.findById(id)
-    // .orElseThrow(() -> new RuntimeException("Curso no encontrado con id: " +
-    // id));
-    // curso.calcularHorasTotales();
-    // return curso;
-    // }
+    // Obtener un curso por id
+    @GetMapping("/{id}")
+    public ResponseEntity<Curso> getCursoById(@PathVariable Integer id) {
+        Optional<Curso> curso = cursoRepository.findById(id);
+        return curso.map(c -> {
+            if (c.getHorasTotales() == null) {
+                c.calcularHorasTotales();
+            }
+            return ResponseEntity.ok(c);
+        }).orElse(ResponseEntity.notFound().build());
+    }
 
-    // // Crear nuevo curso
-    // @PostMapping
-    // public Curso createCurso(@RequestBody Curso curso) {
-    // curso.calcularHorasTotales();
-    // return cursoRepository.save(curso);
-    // }
+    // Crear un nuevo curso
+    @PostMapping
+    public Curso createCurso(@RequestBody Curso curso) {
+        if (curso.getHorasTotales() == null) {
+            curso.calcularHorasTotales();
+        }
+        return cursoRepository.save(curso);
+    }
 
-    // // Actualizar curso
-    // @PutMapping("/{id}")
-    // public Curso updateCurso(@PathVariable Long id, @RequestBody Curso
-    // cursoDetails) {
-    // Curso curso = cursoRepository.findById(id)
-    // .orElseThrow(() -> new RuntimeException("Curso no encontrado con id: " +
-    // id));
+    // Actualizar un curso existente
+    @PutMapping("/{id}")
+    public ResponseEntity<Curso> updateCurso(@PathVariable Integer id, @RequestBody Curso cursoDetails) {
+        Optional<Curso> optionalCurso = cursoRepository.findById(id);
+        if (optionalCurso.isPresent()) {
+            Curso curso = optionalCurso.get();
+            curso.setNombre(cursoDetails.getNombre());
+            curso.setDescripcion(cursoDetails.getDescripcion());
+            curso.setIdAdministrador(cursoDetails.getIdAdministrador());
+            curso.setHoraInicio(cursoDetails.getHoraInicio());
+            curso.setHoraFin(cursoDetails.getHoraFin());
+            curso.setFechaInicio(cursoDetails.getFechaInicio());
+            curso.setFechaFin(cursoDetails.getFechaFin());
+            curso.setDiasDeClase(cursoDetails.getDiasDeClase());
+            // recalcular horas totales
+            curso.calcularHorasTotales();
+            Curso updated = cursoRepository.save(curso);
+            return ResponseEntity.ok(updated);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
-    // curso.setNombre(cursoDetails.getNombre());
-    // curso.setDescripcion(cursoDetails.getDescripcion());
-    // curso.setIdAdministrador(cursoDetails.getIdAdministrador());
-    // curso.setHoraInicio(cursoDetails.getHoraInicio());
-    // curso.setHoraFin(cursoDetails.getHoraFin());
-    // curso.setFechaInicio(cursoDetails.getFechaInicio());
-    // curso.setFechaFin(cursoDetails.getFechaFin());
-    // curso.setDiasDeClase(cursoDetails.getDiasDeClase());
-
-    // curso.calcularHorasTotales(); // recalculamos horas totales al actualizar
-
-    // return cursoRepository.save(curso);
-    // }
-
-    // // Eliminar curso
-    // @DeleteMapping("/{id}")
-    // public String deleteCurso(@PathVariable Long id) {
-    // cursoRepository.deleteById(id);
-    // return "Curso eliminado con id: " + id;
-    // }
+    // Eliminar un curso
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCurso(@PathVariable Integer id) {
+        if (cursoRepository.existsById(id)) {
+            cursoRepository.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

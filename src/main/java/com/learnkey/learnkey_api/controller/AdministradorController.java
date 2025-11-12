@@ -1,21 +1,19 @@
 package com.learnkey.learnkey_api.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import com.learnkey.learnkey_api.model.Administrador;
 import com.learnkey.learnkey_api.repository.AdministradorRepository;
 
+/**
+ * Controlador REST para la gestión de administradores.
+ * Proporciona endpoints para CRUD de administradores.
+ */
 @RestController
 @RequestMapping("/administradores")
 @CrossOrigin(origins = "*")
@@ -24,56 +22,77 @@ public class AdministradorController {
     @Autowired
     private AdministradorRepository administradorRepository;
 
-    // Listar todos los administradores
+    /**
+     * Obtiene la lista de todos los administradores.
+     *
+     * @return Lista de todos los administradores
+     */
     @GetMapping
     public List<Administrador> getAllAdministradores() {
         return administradorRepository.findAll();
     }
 
-    // // Consultar administrador por id
-    // @GetMapping("/{id}")
-    // public Administrador getAdministradorById(@PathVariable Long id) {
-    // return administradorRepository.findById(id)
-    // .orElseThrow(() -> new RuntimeException("Administrador no encontrado con id:
-    // " + id));
-    // }
+    /**
+     * Obtiene un administrador por su id.
+     *
+     * @param id Identificador del administrador
+     * @return Administrador encontrado o 404 si no existe
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<Administrador> getAdministradorById(@PathVariable Integer id) {
+        Optional<Administrador> administrador = administradorRepository.findById(id);
+        return administrador.map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
-    // // Consultar administrador por email
-    // @GetMapping("/email/{email}")
-    // public Administrador getAdministradorByEmail(@PathVariable String email) {
-    // return administradorRepository.findByEmail(email)
-    // .orElseThrow(() -> new RuntimeException("Administrador no encontrado con
-    // email: " + email));
-    // }
+    /**
+     * Crea un nuevo administrador.
+     *
+     * @param administrador Datos del administrador a crear
+     * @return Administrador creado
+     */
+    @PostMapping
+    public Administrador createAdministrador(@RequestBody Administrador administrador) {
+        return administradorRepository.save(administrador);
+    }
 
-    // // Crear nuevo administrador
-    // @PostMapping
-    // public Administrador createAdministrador(@RequestBody Administrador
-    // administrador) {
-    // return administradorRepository.save(administrador);
-    // }
+    /**
+     * Actualiza un administrador existente.
+     *
+     * @param id                   Identificador del administrador a actualizar
+     * @param administradorDetails Datos actualizados del administrador
+     * @return Administrador actualizado o 404 si no existe
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<Administrador> updateAdministrador(@PathVariable Integer id,
+            @RequestBody Administrador administradorDetails) {
+        Optional<Administrador> optionalAdministrador = administradorRepository.findById(id);
+        if (optionalAdministrador.isPresent()) {
+            Administrador administrador = optionalAdministrador.get();
+            administrador.setNombre(administradorDetails.getNombre());
+            administrador.setApellidos(administradorDetails.getApellidos());
+            administrador.setEmail(administradorDetails.getEmail());
+            administrador.setTelefono(administradorDetails.getTelefono());
+            Administrador updated = administradorRepository.save(administrador);
+            return ResponseEntity.ok(updated);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
-    // // Actualizar administrador
-    // @PutMapping("/{id}")
-    // public Administrador updateAdministrador(@PathVariable Long id, @RequestBody
-    // Administrador adminDetails) {
-    // Administrador admin = administradorRepository.findById(id)
-    // .orElseThrow(() -> new RuntimeException("Administrador no encontrado con id:
-    // " + id));
-
-    // admin.setNombre(adminDetails.getNombre());
-    // admin.setApellidos(adminDetails.getApellidos());
-    // admin.setTelefono(adminDetails.getTelefono());
-    // admin.setEmail(adminDetails.getEmail());
-    // admin.setRol(adminDetails.getRol());
-
-    // return administradorRepository.save(admin);
-    // }
-
-    // // Eliminar administrador
-    // @DeleteMapping("/{id}")
-    // public String deleteAdministrador(@PathVariable Long id) {
-    // administradorRepository.deleteById(id);
-    // return "Administrador eliminado con id: " + id;
-    // }
+    /**
+     * Elimina un administrador por su id.
+     *
+     * @param id Identificador del administrador a eliminar
+     * @return 204 si se elimina, 404 si no existe
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteAdministrador(@PathVariable Integer id) {
+        if (administradorRepository.existsById(id)) {
+            administradorRepository.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

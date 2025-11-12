@@ -1,9 +1,11 @@
 package com.learnkey.learnkey_api.controller;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,12 +14,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.learnkey.learnkey_api.model.Asistencia;
 import com.learnkey.learnkey_api.repository.AsistenciaRepository;
 
+/**
+ * Controlador REST para la gestión de asistencias.
+ * Proporciona endpoints para CRUD de asistencias, incluyendo registro de
+ * entrada y salida.
+ */
 @RestController
 @RequestMapping("/asistencias")
 @CrossOrigin(origins = "*")
@@ -26,94 +32,83 @@ public class AsistenciaController {
     @Autowired
     private AsistenciaRepository asistenciaRepository;
 
-    // Obtener todas las asistencias
+    /**
+     * Obtiene todas las asistencias.
+     *
+     * @return Lista de asistencias
+     */
     @GetMapping
     public List<Asistencia> getAllAsistencias() {
         return asistenciaRepository.findAll();
     }
 
-    // Obtener asistencia por id de asistencia
+    /**
+     * Obtiene una asistencia por su id.
+     *
+     * @param id_asistencia Identificador de la asistencia
+     * @return Asistencia encontrada o 404 si no existe
+     */
     @GetMapping("/{id_asistencia}")
-    public Asistencia getAsistenciaById(@PathVariable Integer id_asistencia) {
-        return asistenciaRepository.findById(id_asistencia)
-                .orElseThrow(() -> new RuntimeException("Asistencia no encontrada con id: " + id_asistencia));
+    public ResponseEntity<Asistencia> getAsistenciaById(@PathVariable Integer id_asistencia) {
+        Optional<Asistencia> asistencia = asistenciaRepository.findById(id_asistencia);
+        return asistencia.map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    // // Crear nueva asistencia (registrar entrada)
-    // @PostMapping("/entrada")
-    // public Asistencia registrarEntrada(@RequestBody Asistencia asistencia) {
-    // asistencia.setHoraSalida(null); // salida vacía al inicio
+    /**
+     * Registra la entrada de un alumno en un curso.
+     *
+     * @param asistencia Datos de la asistencia
+     * @return Asistencia registrada
+     */
+    @PostMapping("/entrada")
+    public Asistencia registrarEntrada(@RequestBody Asistencia asistencia) {
+        asistencia.setHoraSalida(null); // salida vacía al inicio
 
-    // // Generar token si no se envía
-    // if (asistencia.getToken() == null || asistencia.getToken().isEmpty()) {
-    // asistencia.setToken(UUID.randomUUID().toString());
-    // }
+        if (asistencia.getToken() == null || asistencia.getToken().isEmpty()) {
+            asistencia.setToken(UUID.randomUUID().toString());
+        }
 
-    // // Verificar duplicado: mismo alumno, curso y fecha
-    // boolean existe =
-    // asistenciaRepository.findByAlumno_Id_alumno(asistencia.getAlumnoId())
-    // .stream()
-    // .anyMatch(a -> a.getCursoId().equals(asistencia.getCursoId())
-    // && a.getFecha().equals(asistencia.getFecha()));
+        // Aquí podrías agregar validaciones de duplicados si quieres
 
-    // if (existe) {
-    // throw new RuntimeException(
-    // "Ya existe una entrada para este alumno en este curso y fecha.");
-    // }
+        return asistenciaRepository.save(asistencia);
+    }
 
-    // return asistenciaRepository.save(asistencia);
-    // }
+    /**
+     * Registra la salida de un alumno de un curso.
+     *
+     * @param id                Identificador de la asistencia
+     * @param asistenciaDetails Datos con hora de salida
+     * @return Asistencia actualizada o 404 si no existe
+     */
+    @PutMapping("/salida/{id}")
+    public ResponseEntity<Asistencia> registrarSalida(@PathVariable Integer id,
+            @RequestBody Asistencia asistenciaDetails) {
+        Optional<Asistencia> optionalAsistencia = asistenciaRepository.findById(id);
+        if (optionalAsistencia.isPresent()) {
+            Asistencia asistencia = optionalAsistencia.get();
+            asistencia.setHoraEntrada(asistenciaDetails.getHoraEntrada());
+            asistencia.setHoraSalida(asistenciaDetails.getHoraSalida());
+            Asistencia updated = asistenciaRepository.save(asistencia);
+            return ResponseEntity.ok(updated);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
-    // // Actualizar asistencia (registrar salida)
-    // @PutMapping("/salida/{id}")
-    // public Asistencia registrarSalida(@PathVariable Integer id, @RequestBody
-    // Asistencia asistenciaDetalles) {
-    // Asistencia asistencia = asistenciaRepository.findById(id)
-    // .orElseThrow(() -> new RuntimeException("Asistencia no encontrada con id: " +
-    // id));
-
-    // asistencia.setHoraSalida(asistenciaDetalles.getHoraSalida());
-    // return asistenciaRepository.save(asistencia);
-    // }
-
-    // // Consultar asistencias por alumno
-    // @GetMapping("/alumno/{idAlumno}")
-    // public List<Asistencia> getAsistenciasPorAlumno(@PathVariable Integer
-    // idAlumno) {
-    // return asistenciaRepository.findByAlumno_Id_alumno(idAlumno);
-    // }
-
-    // // Consultar asistencias por curso
-    // @GetMapping("/curso/{idCurso}")
-    // public List<Asistencia> getAsistenciasPorCurso(@PathVariable Integer idCurso)
-    // {
-    // return asistenciaRepository.findByCurso_Id_curso(idCurso);
-    // }
-
-    // // Consultar asistencias por fecha
-    // @GetMapping("/fecha/{fecha}")
-    // public List<Asistencia> getAsistenciasPorFecha(@PathVariable String fecha) {
-    // return asistenciaRepository.findByFecha(fecha);
-    // }
-
-    // // Consultar asistencia por token
-    // @GetMapping("/token/{token}")
-    // public Asistencia getAsistenciaPorToken(@PathVariable String token) {
-    // return asistenciaRepository.findByToken(token);
-    // }
-
-    // // Consultar asistencias por rango de fechas
-    // @GetMapping("/rango")
-    // public List<Asistencia> getAsistenciasPorRango(
-    // @RequestParam String fechaInicio,
-    // @RequestParam String fechaFin) {
-    // return asistenciaRepository.findByFechaBetween(fechaInicio, fechaFin);
-    // }
-
-    // // Eliminar asistencia
-    // @DeleteMapping("/{id}")
-    // public String deleteAsistencia(@PathVariable Integer id) {
-    // asistenciaRepository.deleteById(id);
-    // return "Asistencia eliminada con id: " + id;
-    // }
+    /**
+     * Elimina una asistencia por su id.
+     *
+     * @param id Identificador de la asistencia
+     * @return 204 si se elimina, 404 si no existe
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteAsistencia(@PathVariable Integer id) {
+        if (asistenciaRepository.existsById(id)) {
+            asistenciaRepository.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }
