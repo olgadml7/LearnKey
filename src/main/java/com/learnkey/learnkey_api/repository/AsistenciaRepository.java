@@ -6,13 +6,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.learnkey.learnkey_api.model.Asistencia;
 
-public interface AsistenciaRepository extends JpaRepository<Asistencia, Long> {
+public interface AsistenciaRepository extends JpaRepository<Asistencia, Integer> {
 
-    // Buscar asistencias por alumno
-    List<Asistencia> findByAlumno_Id_alumno(Long idAlumno);
+    // // Buscar asistencias por alumno
+    // List<Asistencia> findByAlumno_Id_alumno(Integer idAlumno);
 
-    // Buscar asistencias por curso
-    List<Asistencia> findByCurso_Id_curso(Long idCurso);
+    // // Buscar asistencias por curso
+    // List<Asistencia> findByCurso_Id_curso(Integer idCurso);
 
     // Buscar asistencias por fecha
     List<Asistencia> findByFecha(String fecha);

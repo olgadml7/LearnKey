@@ -4,67 +4,54 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "MATRICULAS")
+@Table(name = "matriculas")
 public class Matricula {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id_matricula;
-
-    @ManyToOne
-    @JoinColumn(name = "id_alumno")
-    private Alumno alumno;
-
-    @ManyToOne
-    @JoinColumn(name = "id_curso")
-    private Curso curso;
-
-    private String fecha_matricula;
+    private Integer id_matricula;
+    private Integer id_alumno;
+    private Integer id_curso;
+    private String fecha_alta;
 
     public Matricula() {
     }
 
-    public Matricula(Alumno alumno, Curso curso, String fecha_matricula) {
-        this.alumno = alumno;
-        this.curso = curso;
-        this.fecha_matricula = fecha_matricula;
+    public Matricula(Integer id_alumno, Integer id_curso, String fecha_alta) {
+        this.id_alumno = id_alumno;
+        this.id_curso = id_curso;
+        this.fecha_alta = fecha_alta;
     }
 
     // Getters y Setters
-    public Long getId_matricula() {
-        return id_matricula;
+    public Integer getId_matricula() {
+        return this.id_matricula;
     }
 
-    public void setId_matricula(Long id_matricula) {
-        this.id_matricula = id_matricula;
+    public Integer getAlumnoId() {
+        return this.id_alumno;
     }
 
-    public Alumno getAlumno() {
-        return alumno;
+    public void setAlumnoId(Integer id_alumno) {
+        this.id_alumno = id_alumno;
     }
 
-    public void setAlumno(Alumno alumno) {
-        this.alumno = alumno;
+    public Integer getCursoId() {
+        return this.id_curso;
     }
 
-    public Curso getCurso() {
-        return curso;
+    public void setCursoId(Integer id_curso) {
+        this.id_curso = id_curso;
     }
 
-    public void setCurso(Curso curso) {
-        this.curso = curso;
+    public String getFecha_alta() {
+        return this.fecha_alta;
     }
 
-    public String getFecha_matricula() {
-        return fecha_matricula;
-    }
-
-    public void setFecha_matricula(String fecha_matricula) {
-        this.fecha_matricula = fecha_matricula;
+    public void setFecha_alta(String fecha_alta) {
+        this.fecha_alta = fecha_alta;
     }
 }

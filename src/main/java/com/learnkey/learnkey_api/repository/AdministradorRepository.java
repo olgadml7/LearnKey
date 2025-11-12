@@ -8,5 +8,5 @@ import com.learnkey.learnkey_api.model.Administrador;
 
 public interface AdministradorRepository extends JpaRepository<Administrador, Long> {
 
-    Optional<Administrador> findByEmail(String email);
+    // Optional<Administrador> findByEmail(String email);
 }

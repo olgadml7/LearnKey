@@ -4,63 +4,45 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity
+@Table(name = "asistencia")
 public class Asistencia {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "alumno_id")
-    private Alumno alumno;
-
-    @ManyToOne
-    @JoinColumn(name = "curso_id")
-    private Curso curso;
-
+    private Integer id_asistencia;
+    private Integer id_alumno;
+    private Integer id_curso;
     private String fecha;
-    private String horaEntrada;
-    private String horaSalida;
+    private String hora_entrada;
+    private String hora_salida;
     private String token;
 
     public Asistencia() {
     }
 
-    public Asistencia(Alumno alumno, Curso curso, String fecha, String horaEntrada, String horaSalida, String token) {
-        this.alumno = alumno;
-        this.curso = curso;
+    public Asistencia(Integer alumno, Integer curso, String fecha, String hora_entrada, String hora_salida,
+            String token) {
+        this.id_alumno = alumno;
+        this.id_curso = curso;
         this.fecha = fecha;
-        this.horaEntrada = horaEntrada;
-        this.horaSalida = horaSalida;
+        this.hora_entrada = hora_entrada;
+        this.hora_salida = hora_salida;
         this.token = token;
     }
 
     // Getters y Setters
-    public Long getId() {
-        return id;
+    public Integer getId() {
+        return this.id_asistencia;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public Integer getAlumnoId() {
+        return this.id_alumno;
     }
 
-    public Alumno getAlumno() {
-        return alumno;
-    }
-
-    public void setAlumno(Alumno alumno) {
-        this.alumno = alumno;
-    }
-
-    public Curso getCurso() {
-        return curso;
-    }
-
-    public void setCurso(Curso curso) {
-        this.curso = curso;
+    public Integer getCursoId() {
+        return this.id_curso;
     }
 
     public String getFecha() {
@@ -72,19 +54,19 @@ public class Asistencia {
     }
 
     public String getHoraEntrada() {
-        return horaEntrada;
+        return this.hora_entrada;
     }
 
     public void setHoraEntrada(String horaEntrada) {
-        this.horaEntrada = horaEntrada;
+        this.hora_entrada = horaEntrada;
     }
 
     public String getHoraSalida() {
-        return horaSalida;
+        return this.hora_salida;
     }
 
     public void setHoraSalida(String horaSalida) {
-        this.horaSalida = horaSalida;
+        this.hora_salida = horaSalida;
     }
 
     public String getToken() {

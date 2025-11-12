@@ -1,6 +1,5 @@
 package com.learnkey.learnkey_api.controller;
 
-
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,33 +27,34 @@ public class AlumnoController {
         return alumnoRepository.findAll();
     }
 
-    @PostMapping
-    public Alumno createAlumno(@RequestBody Alumno alumno) {
-        return alumnoRepository.save(alumno);
-    }
+    // @PostMapping
+    // public Alumno createAlumno(@RequestBody Alumno alumno) {
+    // return alumnoRepository.save(alumno);
+    // }
 
-    @GetMapping("/{id}")
-    public Alumno getAlumnoById(@PathVariable Long id) {
-        return alumnoRepository.findById(id).orElse(null);
-    }
+    // @GetMapping("/{id}")
+    // public Alumno getAlumnoById(@PathVariable Long id) {
+    // return alumnoRepository.findById(id).orElse(null);
+    // }
 
-    @PutMapping("/{id}")
-    public Alumno updateAlumno(@PathVariable Long id, @RequestBody Alumno alumnoDetails) {
-        Alumno alumno = alumnoRepository.findById(id).orElse(null);
-        if (alumno != null) {
-            alumno.setNombre(alumnoDetails.getNombre());
-            alumno.setApellidos(alumnoDetails.getApellidos());
-            alumno.setDni(alumnoDetails.getDni());
-            alumno.setFecha_nacimiento(alumnoDetails.getFecha_nacimiento());
-            alumno.setEmail(alumnoDetails.getEmail());
-            alumno.setTelefono(alumnoDetails.getTelefono());
-            return alumnoRepository.save(alumno);
-        }
-        return null;
-    }
+    // @PutMapping("/{id}")
+    // public Alumno updateAlumno(@PathVariable Long id, @RequestBody Alumno
+    // alumnoDetails) {
+    // Alumno alumno = alumnoRepository.findById(id).orElse(null);
+    // if (alumno != null) {
+    // alumno.setNombre(alumnoDetails.getNombre());
+    // alumno.setApellidos(alumnoDetails.getApellidos());
+    // alumno.setDni(alumnoDetails.getDni());
+    // alumno.setFecha_nacimiento(alumnoDetails.getFecha_nacimiento());
+    // alumno.setEmail(alumnoDetails.getEmail());
+    // alumno.setTelefono(alumnoDetails.getTelefono());
+    // return alumnoRepository.save(alumno);
+    // }
+    // return null;
+    // }
 
-    @DeleteMapping("/{id}")
-    public void deleteAlumno(@PathVariable Long id) {
-        alumnoRepository.deleteById(id);
-    }
+    // @DeleteMapping("/{id}")
+    // public void deleteAlumno(@PathVariable Long id) {
+    // alumnoRepository.deleteById(id);
+    // }
 }

@@ -32,83 +32,88 @@ public class AsistenciaController {
         return asistenciaRepository.findAll();
     }
 
-    // Obtener asistencia por id
-    @GetMapping("/{id}")
-    public Asistencia getAsistenciaById(@PathVariable Long id) {
-        return asistenciaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Asistencia no encontrada con id: " + id));
+    // Obtener asistencia por id de asistencia
+    @GetMapping("/{id_asistencia}")
+    public Asistencia getAsistenciaById(@PathVariable Integer id_asistencia) {
+        return asistenciaRepository.findById(id_asistencia)
+                .orElseThrow(() -> new RuntimeException("Asistencia no encontrada con id: " + id_asistencia));
     }
 
-    // Crear nueva asistencia (registrar entrada)
-    @PostMapping("/entrada")
-    public Asistencia registrarEntrada(@RequestBody Asistencia asistencia) {
-        asistencia.setHoraSalida(null); // salida vacía al inicio
+    // // Crear nueva asistencia (registrar entrada)
+    // @PostMapping("/entrada")
+    // public Asistencia registrarEntrada(@RequestBody Asistencia asistencia) {
+    // asistencia.setHoraSalida(null); // salida vacía al inicio
 
-        // Generar token si no se envía
-        if (asistencia.getToken() == null || asistencia.getToken().isEmpty()) {
-            asistencia.setToken(UUID.randomUUID().toString());
-        }
+    // // Generar token si no se envía
+    // if (asistencia.getToken() == null || asistencia.getToken().isEmpty()) {
+    // asistencia.setToken(UUID.randomUUID().toString());
+    // }
 
-        // Verificar duplicado: mismo alumno, curso y fecha
-        boolean existe = asistenciaRepository.findByAlumno_Id_alumno(asistencia.getAlumno().getId_alumno())
-                .stream()
-                .anyMatch(a -> a.getCurso().getId_curso().equals(asistencia.getCurso().getId_curso())
-                        && a.getFecha().equals(asistencia.getFecha()));
+    // // Verificar duplicado: mismo alumno, curso y fecha
+    // boolean existe =
+    // asistenciaRepository.findByAlumno_Id_alumno(asistencia.getAlumnoId())
+    // .stream()
+    // .anyMatch(a -> a.getCursoId().equals(asistencia.getCursoId())
+    // && a.getFecha().equals(asistencia.getFecha()));
 
-        if (existe) {
-            throw new RuntimeException(
-                    "Ya existe una entrada para este alumno en este curso y fecha.");
-        }
+    // if (existe) {
+    // throw new RuntimeException(
+    // "Ya existe una entrada para este alumno en este curso y fecha.");
+    // }
 
-        return asistenciaRepository.save(asistencia);
-    }
+    // return asistenciaRepository.save(asistencia);
+    // }
 
-    // Actualizar asistencia (registrar salida)
-    @PutMapping("/salida/{id}")
-    public Asistencia registrarSalida(@PathVariable Long id, @RequestBody Asistencia asistenciaDetalles) {
-        Asistencia asistencia = asistenciaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Asistencia no encontrada con id: " + id));
+    // // Actualizar asistencia (registrar salida)
+    // @PutMapping("/salida/{id}")
+    // public Asistencia registrarSalida(@PathVariable Integer id, @RequestBody
+    // Asistencia asistenciaDetalles) {
+    // Asistencia asistencia = asistenciaRepository.findById(id)
+    // .orElseThrow(() -> new RuntimeException("Asistencia no encontrada con id: " +
+    // id));
 
-        asistencia.setHoraSalida(asistenciaDetalles.getHoraSalida());
-        return asistenciaRepository.save(asistencia);
-    }
+    // asistencia.setHoraSalida(asistenciaDetalles.getHoraSalida());
+    // return asistenciaRepository.save(asistencia);
+    // }
 
-    // Consultar asistencias por alumno
-    @GetMapping("/alumno/{idAlumno}")
-    public List<Asistencia> getAsistenciasPorAlumno(@PathVariable Long idAlumno) {
-        return asistenciaRepository.findByAlumno_Id_alumno(idAlumno);
-    }
+    // // Consultar asistencias por alumno
+    // @GetMapping("/alumno/{idAlumno}")
+    // public List<Asistencia> getAsistenciasPorAlumno(@PathVariable Integer
+    // idAlumno) {
+    // return asistenciaRepository.findByAlumno_Id_alumno(idAlumno);
+    // }
 
-    // Consultar asistencias por curso
-    @GetMapping("/curso/{idCurso}")
-    public List<Asistencia> getAsistenciasPorCurso(@PathVariable Long idCurso) {
-        return asistenciaRepository.findByCurso_Id_curso(idCurso);
-    }
+    // // Consultar asistencias por curso
+    // @GetMapping("/curso/{idCurso}")
+    // public List<Asistencia> getAsistenciasPorCurso(@PathVariable Integer idCurso)
+    // {
+    // return asistenciaRepository.findByCurso_Id_curso(idCurso);
+    // }
 
-    // Consultar asistencias por fecha
-    @GetMapping("/fecha/{fecha}")
-    public List<Asistencia> getAsistenciasPorFecha(@PathVariable String fecha) {
-        return asistenciaRepository.findByFecha(fecha);
-    }
+    // // Consultar asistencias por fecha
+    // @GetMapping("/fecha/{fecha}")
+    // public List<Asistencia> getAsistenciasPorFecha(@PathVariable String fecha) {
+    // return asistenciaRepository.findByFecha(fecha);
+    // }
 
-    // Consultar asistencia por token
-    @GetMapping("/token/{token}")
-    public Asistencia getAsistenciaPorToken(@PathVariable String token) {
-        return asistenciaRepository.findByToken(token);
-    }
+    // // Consultar asistencia por token
+    // @GetMapping("/token/{token}")
+    // public Asistencia getAsistenciaPorToken(@PathVariable String token) {
+    // return asistenciaRepository.findByToken(token);
+    // }
 
-    // Consultar asistencias por rango de fechas
-    @GetMapping("/rango")
-    public List<Asistencia> getAsistenciasPorRango(
-            @RequestParam String fechaInicio,
-            @RequestParam String fechaFin) {
-        return asistenciaRepository.findByFechaBetween(fechaInicio, fechaFin);
-    }
+    // // Consultar asistencias por rango de fechas
+    // @GetMapping("/rango")
+    // public List<Asistencia> getAsistenciasPorRango(
+    // @RequestParam String fechaInicio,
+    // @RequestParam String fechaFin) {
+    // return asistenciaRepository.findByFechaBetween(fechaInicio, fechaFin);
+    // }
 
-    // Eliminar asistencia
-    @DeleteMapping("/{id}")
-    public String deleteAsistencia(@PathVariable Long id) {
-        asistenciaRepository.deleteById(id);
-        return "Asistencia eliminada con id: " + id;
-    }
+    // // Eliminar asistencia
+    // @DeleteMapping("/{id}")
+    // public String deleteAsistencia(@PathVariable Integer id) {
+    // asistenciaRepository.deleteById(id);
+    // return "Asistencia eliminada con id: " + id;
+    // }
 }
