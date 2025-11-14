@@ -19,11 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.learnkey.learnkey_api.model.Asistencia;
 import com.learnkey.learnkey_api.repository.AsistenciaRepository;
 
-/**
- * Controlador REST para la gestión de asistencias.
- * Proporciona endpoints para CRUD de asistencias, incluyendo registro de
- * entrada y salida.
- */
 @RestController
 @RequestMapping("/asistencias")
 @CrossOrigin(origins = "*")
@@ -32,83 +27,106 @@ public class AsistenciaController {
     @Autowired
     private AsistenciaRepository asistenciaRepository;
 
-    /**
-     * Obtiene todas las asistencias.
-     *
-     * @return Lista de asistencias
-     */
+    // ==============================================
+    // GET - Lista de todas las asistencias
+    // ==============================================
     @GetMapping
     public List<Asistencia> getAllAsistencias() {
         return asistenciaRepository.findAll();
     }
 
-    /**
-     * Obtiene una asistencia por su id.
-     *
-     * @param id_asistencia Identificador de la asistencia
-     * @return Asistencia encontrada o 404 si no existe
-     */
-    @GetMapping("/{id_asistencia}")
-    public ResponseEntity<Asistencia> getAsistenciaById(@PathVariable Integer id_asistencia) {
-        Optional<Asistencia> asistencia = asistenciaRepository.findById(id_asistencia);
-        return asistencia.map(ResponseEntity::ok)
+    // ==============================================
+    // GET - Obtener asistencia por ID
+    // ==============================================
+    @GetMapping("/{id}")
+    public ResponseEntity<Asistencia> getAsistenciaById(@PathVariable Integer id) {
+        return asistenciaRepository.findById(id)
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    /**
-     * Registra la entrada de un alumno en un curso.
-     *
-     * @param asistencia Datos de la asistencia
-     * @return Asistencia registrada
-     */
+    // ==============================================
+    // POST - Registrar entrada de alumno
+    // ==============================================
     @PostMapping("/entrada")
     public Asistencia registrarEntrada(@RequestBody Asistencia asistencia) {
-        asistencia.setHoraSalida(null); // salida vacía al inicio
+
+        asistencia.setHoraSalida(null); // salida vacía al registrar entrada
 
         if (asistencia.getToken() == null || asistencia.getToken().isEmpty()) {
             asistencia.setToken(UUID.randomUUID().toString());
         }
 
-        // Aquí podrías agregar validaciones de duplicados si quieres
-
         return asistenciaRepository.save(asistencia);
     }
 
-    /**
-     * Registra la salida de un alumno de un curso.
-     *
-     * @param id                Identificador de la asistencia
-     * @param asistenciaDetails Datos con hora de salida
-     * @return Asistencia actualizada o 404 si no existe
-     */
+    // ==============================================
+    // PUT - Registrar salida de alumno
+    // ==============================================
     @PutMapping("/salida/{id}")
-    public ResponseEntity<Asistencia> registrarSalida(@PathVariable Integer id,
+    public ResponseEntity<Asistencia> registrarSalida(
+            @PathVariable Integer id,
             @RequestBody Asistencia asistenciaDetails) {
+
         Optional<Asistencia> optionalAsistencia = asistenciaRepository.findById(id);
-        if (optionalAsistencia.isPresent()) {
-            Asistencia asistencia = optionalAsistencia.get();
-            asistencia.setHoraEntrada(asistenciaDetails.getHoraEntrada());
-            asistencia.setHoraSalida(asistenciaDetails.getHoraSalida());
-            Asistencia updated = asistenciaRepository.save(asistencia);
-            return ResponseEntity.ok(updated);
-        } else {
+
+        if (optionalAsistencia.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+
+        Asistencia asistencia = optionalAsistencia.get();
+        asistencia.setHoraSalida(asistenciaDetails.getHoraSalida());
+
+        Asistencia updated = asistenciaRepository.save(asistencia);
+        return ResponseEntity.ok(updated);
     }
 
-    /**
-     * Elimina una asistencia por su id.
-     *
-     * @param id Identificador de la asistencia
-     * @return 204 si se elimina, 404 si no existe
-     */
+    // ==============================================
+    // PUT - Corrección manual (profesor)
+    // ==============================================
+    @PutMapping("/{id}")
+    public ResponseEntity<Asistencia> actualizarAsistencia(
+            @PathVariable Integer id,
+            @RequestBody Asistencia asistenciaDetails) {
+
+        Optional<Asistencia> optionalAsistencia = asistenciaRepository.findById(id);
+
+        if (optionalAsistencia.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Asistencia asistencia = optionalAsistencia.get();
+
+        // Actualización parcial de campos
+        if (asistenciaDetails.getHoraEntrada() != null) {
+            asistencia.setHoraEntrada(asistenciaDetails.getHoraEntrada());
+        }
+        if (asistenciaDetails.getHoraSalida() != null) {
+            asistencia.setHoraSalida(asistenciaDetails.getHoraSalida());
+        }
+        if (asistenciaDetails.getFecha() != null) {
+            asistencia.setFecha(asistenciaDetails.getFecha());
+        }
+        if (asistenciaDetails.getId_alumno() != null) {
+            asistencia.setId_alumno(asistenciaDetails.getId_alumno());
+        }
+        if (asistenciaDetails.getId_curso() != null) {
+            asistencia.setId_curso(asistenciaDetails.getId_curso());
+        }
+
+        Asistencia updated = asistenciaRepository.save(asistencia);
+        return ResponseEntity.ok(updated);
+    }
+
+    // ==============================================
+    // DELETE - Eliminar asistencia por ID
+    // ==============================================
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAsistencia(@PathVariable Integer id) {
         if (asistenciaRepository.existsById(id)) {
             asistenciaRepository.deleteById(id);
             return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.notFound().build();
     }
 }
