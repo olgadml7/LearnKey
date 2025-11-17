@@ -1,22 +1,22 @@
-package com.learnkey.learnkey_api.controller;
+package com.learnkey.learnkey_api.controller; //paquete donde se encuentra este controlador
 
-import java.util.List; //clases de Java para manejar listas de objetos y valores que pueden no existir.
-import java.util.Optional;
+import java.util.List; // clase para manejar listas de objetos
+import java.util.Optional; // clase para manejar valores que pueden no estar presentes (null safe)
 
 import org.springframework.beans.factory.annotation.Autowired; //le dice a Spring que inyecte automáticamente la dependencia (CursoRepository) para usarla sin tener que crearla manualmente.
 import org.springframework.http.ResponseEntity; //permite devolver respuestas HTTP completas
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping; //anotaciones que definen el comportamiento del controlador (explicado más abajo)
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.CrossOrigin; // permite configurar permisos CORS
+import org.springframework.web.bind.annotation.DeleteMapping; // mapea solicitudes DELETE
+import org.springframework.web.bind.annotation.GetMapping; // mapea solicitudes GET
+import org.springframework.web.bind.annotation.PathVariable; // obtiene variables desde la URL
+import org.springframework.web.bind.annotation.PostMapping; // mapea solicitudes POST
+import org.springframework.web.bind.annotation.PutMapping; // mapea solicitudes PUT
+import org.springframework.web.bind.annotation.RequestBody; // indica que el cuerpo del request se convierte a un objeto Java
+import org.springframework.web.bind.annotation.RequestMapping; //define la ruta base del controlador
+import org.springframework.web.bind.annotation.RestController; //anotaciones que definen el comportamiento del controlador (explicado más abajo)
 
-import com.learnkey.learnkey_api.model.Curso; //modelo
-import com.learnkey.learnkey_api.repository.CursoRepository; //repositorio para acceder a la base de datos
+import com.learnkey.learnkey_api.model.Curso; // import del modelo Curso
+import com.learnkey.learnkey_api.repository.CursoRepository; // import del repositorio que accede a la BD
 
 @RestController // indica que esta clase responde a solicitudes HTTP y devuelve datos en formato
                 // JSON
@@ -31,44 +31,45 @@ public class CursoController { // definicion de la clase que maneja los cursos
                                              // escribir SQL.
 
     // Obtener todos los cursos
-    @GetMapping
+    @GetMapping // se activa al hacer GET /cursos
     public List<Curso> getAllCursos() { // responde a GET/Cursos
         List<Curso> cursos = cursoRepository.findAll(); // devuelve todos los cursos de la base de datos
-        cursos.forEach(c -> {
-            if (c.getHorasTotales() == null) {
-                c.calcularHorasTotales();
-            } // recorre la lista y si las horas totales es nulo, lo calcula automaticamente
+        cursos.forEach(c -> { // recorre cada curso
+            if (c.getHorasTotales() == null) { // si las horas totales no están calculadas
+                c.calcularHorasTotales(); // las calcula automáticamente
+            }
         });
         return cursos; // devuelve la lista completa como json
     }
 
     // Obtener un curso por id
-    @GetMapping("/{id}")
+    @GetMapping("/{id}") // ruta: GET /cursos/{id}
     public ResponseEntity<Curso> getCursoById(@PathVariable Integer id) {
-        Optional<Curso> curso = cursoRepository.findById(id); // maneja el caso de que el curso no exista
-        return curso.map(c -> {
-            if (c.getHorasTotales() == null) { // si existe calcula las horas y devuelve un 200 y sino un 404
-                c.calcularHorasTotales();
+        Optional<Curso> curso = cursoRepository.findById(id); // busca el curso por su ID
+        return curso.map(c -> { // si existe
+            if (c.getHorasTotales() == null) { // valida si le faltan horas totales
+                c.calcularHorasTotales(); // las calcula
             }
-            return ResponseEntity.ok(c);
-        }).orElse(ResponseEntity.notFound().build());
+            return ResponseEntity.ok(c); // devuelve 200 OK + body JSON
+        }).orElse(ResponseEntity.notFound().build()); // si no existe → 404 Not Found
     }
 
     // Crear un nuevo curso
     @PostMapping // responde a post/cursos
-    public Curso createCurso(@RequestBody Curso curso) {
-        if (curso.getHorasTotales() == null) {
-            curso.calcularHorasTotales();
+    public Curso createCurso(@RequestBody Curso curso) { // recibe un JSON y lo convierte a Curso
+        if (curso.getHorasTotales() == null) { // si no trae horas totales
+            curso.calcularHorasTotales(); // las calcula antes de guardar
         }
         return cursoRepository.save(curso); // guarda el curso en la base de datos y devuelve el objeto guardado
     }
 
     // Actualizar un curso existente
-    @PutMapping("/{id}")
+    @PutMapping("/{id}") // ruta: PUT /cursos/{id}
     public ResponseEntity<Curso> updateCurso(@PathVariable Integer id, @RequestBody Curso cursoDetails) {
-        Optional<Curso> optionalCurso = cursoRepository.findById(id);
-        if (optionalCurso.isPresent()) {
-            Curso curso = optionalCurso.get();
+        Optional<Curso> optionalCurso = cursoRepository.findById(id); // busca el curso
+        if (optionalCurso.isPresent()) { // si existe
+            Curso curso = optionalCurso.get(); // obtiene el objeto real
+            // Actualiza todos los campos del curso con los datos recibidos
             curso.setNombre(cursoDetails.getNombre());
             curso.setDescripcion(cursoDetails.getDescripcion());
             curso.setIdAdministrador(cursoDetails.getIdAdministrador());
@@ -77,24 +78,24 @@ public class CursoController { // definicion de la clase que maneja los cursos
             curso.setFechaInicio(cursoDetails.getFechaInicio());
             curso.setFechaFin(cursoDetails.getFechaFin());
             curso.setDiasDeClase(cursoDetails.getDiasDeClase());
-            // recalcular horas totales
-            curso.calcularHorasTotales();
-            Curso updated = cursoRepository.save(curso);
-            return ResponseEntity.ok(updated);
+
+            curso.calcularHorasTotales(); // recalcular horas totales
+            Curso updated = cursoRepository.save(curso); // guarda los cambios en BD
+            return ResponseEntity.ok(updated); // devuelve 200 OK con el curso actualizado
         } else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.notFound().build(); // si no existe → 404
         }
     } // busca el curso por id, si existe actualiza todos los atributosy recalcula las
       // horas , y devuelve un ok con todo actualizado, sino da error
 
     // Eliminar un curso
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id}") // ruta: DELETE /cursos/{id}
     public ResponseEntity<Void> deleteCurso(@PathVariable Integer id) {
-        if (cursoRepository.existsById(id)) {
-            cursoRepository.deleteById(id);
-            return ResponseEntity.noContent().build();
+        if (cursoRepository.existsById(id)) { // verifica si existe
+            cursoRepository.deleteById(id); // elimina el curso
+            return ResponseEntity.noContent().build(); // devuelve 204 No Content
         } else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.notFound().build(); // si no existe → 404
         }
-    } // busca el curso por id, si existe lo elimina y sino devuelve un no encontrado
-}// un 204 es que todo esta bien pero que no hay datos que devolver
+    }
+}
