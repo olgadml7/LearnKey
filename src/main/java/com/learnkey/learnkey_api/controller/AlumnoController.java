@@ -1,22 +1,28 @@
 package com.learnkey.learnkey_api.controller; // Paquete donde se encuentra este controlador
 
+import java.util.HashMap;
 import java.util.List; // Importa la clase List para trabajar con listas de alumnos
-import java.util.Optional;// Importa Optional para manejar valores potencialmente nulos
+import java.util.Map;// Importa Optional para manejar valores potencialmente nulos
+import java.util.Optional; // Para inyectar dependencias automáticamente
 
-import org.springframework.beans.factory.annotation.Autowired; // Para inyectar dependencias automáticamente
-import org.springframework.http.ResponseEntity; // Para construir respuestas HTTP complejas (200, 404...)
-import org.springframework.web.bind.annotation.CrossOrigin; // Para permitir CORS
-import org.springframework.web.bind.annotation.DeleteMapping; // Para manejar solicitudes DELETE
-import org.springframework.web.bind.annotation.GetMapping; // Para manejar solicitudes GET
-import org.springframework.web.bind.annotation.PathVariable; // Para extraer variables de la URL
-import org.springframework.web.bind.annotation.PostMapping; // Para manejar solicitudes POST
-import org.springframework.web.bind.annotation.PutMapping; // Para manejar solicitudes PUT
-import org.springframework.web.bind.annotation.RequestBody; // Para recibir datos del cuerpo de la petición
-import org.springframework.web.bind.annotation.RequestMapping; // Para definir la ruta base del controlador
-import org.springframework.web.bind.annotation.RestController; // Para indicar que es un controlador REST
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus; // Para construir respuestas HTTP complejas (200, 404...)
+import org.springframework.http.ResponseEntity; // Para permitir CORS
+import org.springframework.web.bind.annotation.CrossOrigin; // Para manejar solicitudes DELETE
+import org.springframework.web.bind.annotation.DeleteMapping; // Para manejar solicitudes GET
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping; // Para extraer variables de la URL
+import org.springframework.web.bind.annotation.PathVariable; // Para manejar solicitudes POST
+import org.springframework.web.bind.annotation.PostMapping; // Para manejar solicitudes PUT
+import org.springframework.web.bind.annotation.PutMapping; // Para recibir datos del cuerpo de la petición
+import org.springframework.web.bind.annotation.RequestBody; // Para definir la ruta base del controlador
+import org.springframework.web.bind.annotation.RequestMapping; // Para indicar que es un controlador REST
+import org.springframework.web.bind.annotation.RestController;
 
 import com.learnkey.learnkey_api.model.Alumno; // Importa el modelo Alumno
-import com.learnkey.learnkey_api.repository.AlumnoRepository; // Importa el repositorio de Alumno
+import com.learnkey.learnkey_api.model.AlumnoPatchDTO; // Importa el repositorio de Alumno
+import com.learnkey.learnkey_api.repository.AlumnoRepository;
 
 /**
  * Controlador REST para la gestión de alumnos.
@@ -91,6 +97,29 @@ public class AlumnoController { // Inicio de la clase AlumnoController
         }
     }
 
+    @PatchMapping("/{id}")
+    public ResponseEntity<Alumno> actualizarAlumnoParcial(
+            @PathVariable Integer id,
+            @RequestBody AlumnoPatchDTO patchDTO) {
+
+        Alumno alumno = alumnoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Alumno no encontrado"));
+
+        // Actualizar solo los campos que no sean null
+        if (patchDTO.getNombre() != null) {
+            alumno.setNombre(patchDTO.getNombre());
+        }
+        if (patchDTO.getApellidos() != null) {
+            alumno.setApellidos(patchDTO.getApellidos());
+        }
+        if (patchDTO.getEmail() != null) {
+            alumno.setEmail(patchDTO.getEmail());
+        }
+
+        Alumno actualizado = alumnoRepository.save(alumno);
+        return ResponseEntity.ok(actualizado);
+    }
+
     /**
      * Elimina un alumno por su id.
      *
@@ -98,12 +127,23 @@ public class AlumnoController { // Inicio de la clase AlumnoController
      * @return 204 si se elimina, 404 si no existe
      */
     @DeleteMapping("/{id}") // Maneja solicitudes DELETE a /alumnos/{id}
-    public ResponseEntity<Void> deleteAlumno(@PathVariable Integer id) { // Método para eliminar por ID
-        if (alumnoRepository.existsById(id)) { // Comprueba si el alumno existe en la BD
-            alumnoRepository.deleteById(id); // Si existe, lo elimina
-            return ResponseEntity.noContent().build(); // Devuelve 204 No Content
-        } else { // si no existe
-            return ResponseEntity.notFound().build(); // Devuelve 404 Not Found
+    public ResponseEntity<Map<String, String>> deleteAlumno(@PathVariable Integer id) {
+        Map<String, String> response = new HashMap<>();
+
+        if (!alumnoRepository.existsById(id)) {
+            response.put("message", "Alumno no encontrado");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
+
+        try {
+            alumnoRepository.deleteById(id);
+            response.put("message", "Alumno eliminado correctamente");
+            return ResponseEntity.ok(response);
+        } catch (DataIntegrityViolationException e) {
+            // Esto ocurre si hay asistencias asociadas
+            response.put("message", "No se puede eliminar el alumno: tiene registros de asistencia asociados");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        }
+
     }
 }

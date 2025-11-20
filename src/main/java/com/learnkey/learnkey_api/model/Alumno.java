@@ -43,9 +43,9 @@ public class Alumno { // Declaración de la clase Alumno
     public Alumno() { // Constructor vacío requerido por JPA
     }
 
-    public Alumno(Integer id_alumno, String nombre, String apellidos, String dni, LocalDate fecha_nacimiento,
+    public Alumno(Integer id, String nombre, String apellidos, String dni, LocalDate fecha_nacimiento,
             String email, String telefono) { // Constructor con parámetros para crear objetos más fácilmente
-        this.id_alumno = id_alumno; // Asigna el parámetro al atributo id_alumno
+        this.id_alumno = id; // Asigna el parámetro al atributo id_alumno
         this.nombre = nombre; // Asigna el parámetro al atributo nombre
         this.apellidos = apellidos; // Asigna el parámetro al atributo apellidos
         this.dni = dni; // Asigna el parámetro al atributo dni
@@ -109,5 +109,6 @@ public class Alumno { // Declaración de la clase Alumno
 
     public void setTelefono(String telefono) { // Setter del teléfono
         this.telefono = telefono; // Asigna el teléfono recibido
+
     }
 }
